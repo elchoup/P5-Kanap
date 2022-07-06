@@ -49,7 +49,7 @@ function createColor(canap) {
 
 function createPrice(canap) {
     const priceCanap = document.createElement('p');
-    priceCanap.textContent =(canap.price) + '€';
+    priceCanap.textContent = (canap.price) + '€';
     return priceCanap;
 }
 
@@ -95,6 +95,9 @@ function createDeleteItem() {
     return deleteItem;
 }
 
+let totalPrix = [];
+let totalQty = [];
+
 if (localStorage.getItem('stock') != null) {
     let stockCanapLinea = localStorage.getItem('stock');
     stockCanapJson = JSON.parse(stockCanapLinea);
@@ -114,7 +117,7 @@ async function fetchCanap() {
 
 
             .then(function (infoCanap) {
-                console.log(infoCanap);
+
                 let artcl = createArticle(stockCanapJson[i]);
                 let imgDiv = createDivImg();
                 let Img = createImg(infoCanap);
@@ -129,9 +132,6 @@ async function fetchCanap() {
                 let qtyInput = createInputQty(stockCanapJson[i]);
                 let deleteDiv = createDivDelete();
                 let itemDelete = createDeleteItem();
-
-
-
 
                 cartItems.appendChild(artcl);
                 artcl.appendChild(imgDiv);
@@ -148,29 +148,37 @@ async function fetchCanap() {
                 settingsDiv.appendChild(deleteDiv);
                 deleteDiv.appendChild(itemDelete);
 
-                
-                itemDelete.onclick = (event) =>{
-                    
-                    event.target.value = itemDelete.closest('artcl').deleteRow(stockCanapJson[i]);
+                itemDelete.onclick = (event) => {
 
-                    }
-                    
+                    let lol = itemDelete.closest('article');
+                    event.target.value = lol.remove();
+
                 }
-                    
-                
 
+                // Calcul du total du prix  de la quantité
+                // Retrouver les différents prix et  quantités selectionnées dans le panier
+                let calculPrix = infoCanap.price * stockCanapJson[i].quantitySelect;
+                let qtyInPanier = stockCanapJson[i].quantitySelect;
 
+                // Mettre les différentes quantité dans le tableau totalQty
+                totalPrix.push(calculPrix);
+                totalQty.push(qtyInPanier);
+
+                //Calcul de la somme des prix et quantités.
+                let sumPrice = totalPrix.reduce((previousValue, currentValue) => previousValue + currentValue, 0);
+                let sumQty = totalQty.reduce((previousValue, currentValue) => previousValue + currentValue, 0);
+
+                // Ajout des resultats au html
+                let total$ = document.getElementById('totalPrice');
+                total$.innerHTML = sumPrice;
+                let totalQUantity = document.getElementById('totalQuantity');
+                totalQUantity.innerHTML = sumQty;
 
             })
     }
 }
 
 fetchCanap();
-
-
-
-
-
 
 let firstName = document.getElementById('firstName');
 let firstNameError = document.getElementById('firstNameErrorMsg');
