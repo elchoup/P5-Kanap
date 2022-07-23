@@ -97,6 +97,7 @@ function createDeleteItem() {
 
 let totalPrix = [];
 let totalQty = [];
+let stockCanapJson;
 
 if (localStorage.getItem('stock') != null) {
     let stockCanapLinea = localStorage.getItem('stock');
@@ -136,7 +137,7 @@ async function fetchCanap() {
                 cartItems.appendChild(artcl);
                 artcl.appendChild(imgDiv);
                 imgDiv.appendChild(Img);
-                cartItems.appendChild(contentDiv);
+                artcl.appendChild(contentDiv);
                 contentDiv.appendChild(descriptionDiv);
                 descriptionDiv.appendChild(name);
                 descriptionDiv.appendChild(color);
@@ -146,15 +147,30 @@ async function fetchCanap() {
                 qtyDiv.appendChild(quantity);
                 qtyDiv.appendChild(qtyInput);
                 settingsDiv.appendChild(deleteDiv);
-                deleteDiv.appendChild(itemDelete);
+                deleteDiv.appendChild(itemDelete);                  
+                
 
                 itemDelete.onclick = (event) => {
-
-                    let lol = itemDelete.closest('article');
-                    event.target.value = lol.remove();
-
+                    let lol = event.target.closest('article');
+                    lol.remove();
+                    let saveIndex = -1
+                    for (let k = 0; k < stockCanapJson.length; k++){
+                        if (stockCanapJson[k].idCanap === lol.dataset.id && stockCanapJson[k].colorChoice === lol.dataset.color){
+                            saveIndex = k;
+                            stockCanapJson.splice(saveIndex,1);
+                            localStorage.setItem('stock', JSON.stringify(stockCanapJson))
+                            window.location.reload();
+                            break;
+                        }
+                    }
+                }      
+                    console.log(stockCanapJson);
+            
+                qtyInput.onchange = (event) => {
+                    updtateQty(event, i);
                 }
 
+                      
                 // Calcul du total du prix  de la quantité
                 // Retrouver les différents prix et  quantités selectionnées dans le panier
                 let calculPrix = infoCanap.price * stockCanapJson[i].quantitySelect;
@@ -166,7 +182,7 @@ async function fetchCanap() {
 
                 //Calcul de la somme des prix et quantités.
                 let sumPrice = totalPrix.reduce((previousValue, currentValue) => previousValue + currentValue, 0);
-                let sumQty = totalQty.reduce((previousValue, currentValue) => previousValue + currentValue, 0);
+                let sumQty = totalQty.reduce((previousValue, currentValue) => previousValue + parseInt(currentValue), 0);
 
                 // Ajout des resultats au html
                 let total$ = document.getElementById('totalPrice');
@@ -180,6 +196,15 @@ async function fetchCanap() {
 
 fetchCanap();
 
+// fonction update
+function updtateQty(event, index){
+    stockCanapJson[index].quantitySelect = event.target.value;
+    localStorage.setItem('stock', JSON.stringify(stockCanapJson));
+    console.log('updtateQty');
+    window.location.reload();
+};
+
+// Création de variables correspondant aux  élements du html du formulaire de contact
 let firstName = document.getElementById('firstName');
 let firstNameError = document.getElementById('firstNameErrorMsg');
 let lastName = document.getElementById('lastName');
@@ -192,6 +217,8 @@ let email = document.getElementById('email');
 let emailError = document.getElementById('emailErrorMsg');
 let order = document.getElementById('order');
 
+// Création des regex pour vérifier les information entrées par l'utilisateur
+//Création des erreurs en cas de non respect
 firstName.addEventListener('input', (event) => {
     if (event.target.value.match(/^[A-Za-z]+[ \-']?[A-Za-z]+$/)) {
         firstNameError.innerHTML = '';
@@ -236,30 +263,75 @@ email.addEventListener('input', (event) => {
     }
 });
 
+// Vérification des données en cliquant sur le bouton commander
 order.onclick = (event) => {
+    event.stopPropagation();
+    event.preventDefault();
+    let isFormulaireCorrect = true;
     if (firstNameError.innerHTML != '') {
-        event.preventDefault();
-        alert('Erreur saisie du prenom')
+        alert('Erreur saisie du prenom');
+        isFormulaireCorrect = false;
     }
 
     if (lastNameError.innerHTML != '') {
-        event.preventDefault();
-        alert('Erreur saisie du NOM')
+        alert('Erreur saisie du NOM');
+        isFormulaireCorrect = false;
     }
 
     if (addressError.innerHTML != '') {
-        event.preventDefault();
-        alert('Erreur saisie de l\'adresse')
+        alert('Erreur saisie de l\'adresse');
+        isFormulaireCorrect = false;
     }
 
     if (cityError.innerHTML != '') {
-        event.preventDefault();
-        alert('Erreur de saisie de la ville')
+        alert('Erreur de saisie de la ville');
+        isFormulaireCorrect = false;
     }
 
+    if (isFormulaireCorrect){
+        send();
+    }
+
+   
 };
 
 
+function send() {
+    
+    let contact = {
+        firstName: firstName.value,
+        lastName: lastName.value,
+        address: address.value,
+        city: city.value,
+        email: email.value
+
+    }
+
+    let products = stockCanapJson.map((canap) => {
+        return canap.idCanap;
+    });
+
+    let body = {
+        contact: contact,
+        products: products
+    }
+    console.log(body);
+    fetch("http://localhost:3000/api/products/order", {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+    })
+        .then(res => res.json())
+
+        .then(json =>
+        document.location.href=('http://localhost:5500/P5-Dev-Web-Kanap/front/html/confirmation.html?id='+ json.orderId)
+        
+        
+        //faire redirection avec orderID
+        )
+}
 
 
 
