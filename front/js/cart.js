@@ -151,11 +151,11 @@ async function fetchCanap() {
                 
 
                 itemDelete.onclick = (event) => {
-                    let lol = event.target.closest('article');
-                    lol.remove();
+                    let articleSupress = event.target.closest('article');
+                    articleSupress.remove();
                     let saveIndex = -1
                     for (let k = 0; k < stockCanapJson.length; k++){
-                        if (stockCanapJson[k].idCanap === lol.dataset.id && stockCanapJson[k].colorChoice === lol.dataset.color){
+                        if (stockCanapJson[k].idCanap === articleSupress.dataset.id && stockCanapJson[k].colorChoice === articleSupress.dataset.color){
                             saveIndex = k;
                             stockCanapJson.splice(saveIndex,1);
                             localStorage.setItem('stock', JSON.stringify(stockCanapJson))
@@ -167,6 +167,10 @@ async function fetchCanap() {
                     console.log(stockCanapJson);
             
                 qtyInput.onchange = (event) => {
+                    if (qtyInput.checkValidity()){
+                        qtyInput.reportValidity();
+                        quantitySelect = infoCanap.quantitySelect;
+                    }
                     updtateQty(event, i);
                 }
 
@@ -198,10 +202,18 @@ fetchCanap();
 
 // fonction update
 function updtateQty(event, index){
+    if (event.target.value >= 1){
     stockCanapJson[index].quantitySelect = event.target.value;
     localStorage.setItem('stock', JSON.stringify(stockCanapJson));
     console.log('updtateQty');
     window.location.reload();
+    }else{
+        alert('la quantité doit être supérieure à 0, votre stock passe à 1' );
+        event.target.value = 1;
+        stockCanapJson[index].quantitySelect = event.target.value;
+        localStorage.setItem('stock', JSON.stringify(stockCanapJson));
+        window.location.reload();
+    }
 };
 
 // Création de variables correspondant aux  élements du html du formulaire de contact
