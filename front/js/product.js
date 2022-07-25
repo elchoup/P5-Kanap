@@ -60,70 +60,78 @@ fetch('http://localhost:3000/api/products/' + id)
 
         //Création de la variable quantity qui correspond à l'input ayant pour id quantity
         let quantity = document.getElementById('quantity');
+        
 
+        
         // Action du click 'ajouter au panier'
         addToCart.onclick = (event) => {
-        // Variable pour récuperer la valeur de colorSelect
-        let colorSelectvalue = colorSelect.options[colorSelect.selectedIndex].value;
 
-        event.preventDefault();
-   
-        // Recuperation des données du localstorage. 
-        // On recupère stockCanapSJson('tableau') avec la variable stockCanapLinea et on cree stockCanapJson('tableau') qui parse stockCanapLinea
-        let stockCanapJson = [];
-
-        if ( localStorage.getItem('stock') != null ) {
-            let stockCanapLinea = localStorage.getItem('stock');
-            stockCanapJson = JSON.parse(stockCanapLinea);
-        }
-
-        let newCanap = {
-            idCanap : id,
-            colorChoice : colorSelectvalue,
-            quantitySelect : parseInt(quantity.value)
-        };
-
-        let saveIndex = -1;
-        
-        // Création d'un for avec le i (représentant l'index d'une ligne du tableau).
-        for (let i = 0; i < stockCanapJson.length; i++) {
-            if (stockCanapJson[i].idCanap === id && stockCanapJson[i].colorChoice === colorSelectvalue){
-                saveIndex = i;
-                break;
+            // Variable pour récuperer la valeur de colorSelect
+            let colorSelectvalue = colorSelect.options[colorSelect.selectedIndex].value;
+            event.preventDefault();
+            
+            let valid = document.querySelector('form');
+            if (!valid.checkValidity()){
+                valid.reportValidity();
+                quantity.value = 0;
             }
-        }
 
-        if (saveIndex != -1){
-            // cas ou le canap est présent
-            // On ajoute la quantité de canapé nouvellement selectionné à l'ancienne.
-            stockCanapJson[saveIndex].quantitySelect += parseInt(quantity.value); 
-        }else{
-            // cas ou le canap est absent.
-            // Création d'une nouvelle ligne dans le tableau
-            stockCanapJson.push(newCanap);
-        }  
-        
-        // fonction pour trier les canapé par id
-        stockCanapJson.sort((a,b) => {
-            if (a.idCanap<b.idCanap){
-                return -1;
-            }
-            if(a.idCanap>b.idCanap){
-                return 1;
-            }
-            else{
-                return 0;
-            }
-        
-        });
+            // Recuperation des données du localstorage. 
+            // On recupère stockCanapSJson('tableau') avec la variable stockCanapLinea et on cree stockCanapJson('tableau') qui parse stockCanapLinea
+            let stockCanapJson = [];
 
-        // On enregistre les données dans le localstorage
-        let stockLinea = JSON.stringify(stockCanapJson);
-        localStorage.setItem('stock', stockLinea);
+            if ( localStorage.getItem('stock') != null ) {
+                let stockCanapLinea = localStorage.getItem('stock');
+                stockCanapJson = JSON.parse(stockCanapLinea);
+            }
 
+            let newCanap = {
+                idCanap : id,
+                colorChoice : colorSelectvalue,
+                quantitySelect : parseInt(quantity.value)
+            };
+
+            let saveIndex = -1;
+            
+            // Création d'un for avec le i (représentant l'index d'une ligne du tableau).
+            for (let i = 0; i < stockCanapJson.length; i++) {
+                if (stockCanapJson[i].idCanap === id && stockCanapJson[i].colorChoice === colorSelectvalue){
+                    saveIndex = i;
+                    break;
+                }
+            }
+
+            if (saveIndex != -1){
+                // cas ou le canap est présent
+                // On ajoute la quantité de canapé nouvellement selectionné à l'ancienne.
+                stockCanapJson[saveIndex].quantitySelect += parseInt(quantity.value); 
+            }else{
+                // cas ou le canap est absent.
+                // Création d'une nouvelle ligne dans le tableau
+                stockCanapJson.push(newCanap);
+            }  
+            
+            // fonction pour trier les canapé par id
+            stockCanapJson.sort((a,b) => {
+                if (a.idCanap<b.idCanap){
+                    return -1;
+                }
+                if(a.idCanap>b.idCanap){
+                    return 1;
+                }
+                else{
+                    return 0;
+                }
+            
+            });
+
+            // On enregistre les données dans le localstorage
+            let stockLinea = JSON.stringify(stockCanapJson);
+            localStorage.setItem('stock', stockLinea);
         }
 
     })
+    
 
     .catch(function (err) {
         // Une erreur est survenue
