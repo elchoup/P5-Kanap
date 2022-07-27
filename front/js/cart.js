@@ -338,8 +338,8 @@ function send() {
         .then(res => res.json())
 
         .then(json =>
-        document.location.href=('http://localhost:5500/P5-Dev-Web-Kanap/front/html/confirmation.html?id='+ json.orderId)
-        
+        document.location.href=('http://localhost:5500/P5-Dev-Web-Kanap/front/html/confirmation.html?id='+ json.orderId),
+        localStorage.clear()
         
         //faire redirection avec orderID
         )

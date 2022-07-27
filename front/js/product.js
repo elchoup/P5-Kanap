@@ -68,6 +68,9 @@ fetch('http://localhost:3000/api/products/' + id)
 
             // Variable pour récuperer la valeur de colorSelect
             let colorSelectvalue = colorSelect.options[colorSelect.selectedIndex].value;
+            if (colorSelectvalue != ""){
+                 
+            
             event.preventDefault();
             
             let valid = document.querySelector('form');
@@ -128,7 +131,11 @@ fetch('http://localhost:3000/api/products/' + id)
             // On enregistre les données dans le localstorage
             let stockLinea = JSON.stringify(stockCanapJson);
             localStorage.setItem('stock', stockLinea);
+        }else{
+            alert('choisissez une couleur')
         }
+
+    }
 
     })
     
